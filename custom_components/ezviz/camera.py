@@ -19,7 +19,7 @@ import homeassistant.helpers.config_validation as cv
 _LOGGER = logging.getLogger(__name__)
 
 
-
+HOST = "https://open.ys7.com/"
 CONF_ID = 'id'
 CONF_KEY = 'key'
 CONF_SEC = 'sec'
@@ -73,6 +73,38 @@ class EzvizCamera(Camera):
         return True
 
     @property
+    def is_on(self):
+        """Return true if on."""
+        res = self.http_post('/api/lapp/device/scene/switch/status')
+        if res['code'] != '200':
+            return False
+        if res['data']['enable'] == '1':
+            return True
+        return False
+
+    def turn_off(self):
+        """Turn off camera."""
+        self.http_post('/api/lapp/device/scene/switch/set', {'enable': '1'})
+
+    #@callback
+    #def async_turn_off(self):
+    #    """Turn off camera."""
+    #    return self.hass.async_add_job(self.turn_off)
+
+    def turn_on(self):
+        """Turn on camera."""
+        self.http_post('/api/lapp/device/scene/switch/set', {'enable': '0'})
+    def http_post(self, url, data={}):
+        data['accessToken'] = self.accessToken
+        data['deviceSerial']  = self.deviceSerial
+        r = requests.post(HOST + url, data=data)
+        rjson = r.json()
+        if rjson['code'] == '10002':
+            if self.get_token(self.appKey, self.appSecret):
+                r = requests.post(HOST + url, data=data)
+        return r.json()
+
+    @property
     def motion_detection_enabled(self):
         r = requests.post('https://open.ys7.com/api/lapp/device/info', data={'accessToken':self.accessToken,'deviceSerial':self.deviceSerial})
         result = r.json()
@@ -86,7 +118,7 @@ class EzvizCamera(Camera):
         r = requests.post('https://open.ys7.com/api/lapp/device/defence/set', data={'accessToken':self.accessToken,'deviceSerial':self.deviceSerial,'isDefence': 0})
         self.schedule_update_ha_state()
 
-    def get_token(key,secret):
+    def get_token(self, key, secret):
         r = requests.post('https://open.ys7.com/api/lapp/token/get', data={'appKey':key,'appSecret':secret})
         token_result = r.json()
         if (token_result['code']=='200'):
@@ -95,14 +127,14 @@ class EzvizCamera(Camera):
             return True
         else:
             return False
-    def check_token_is_expired():
+    def check_token_is_expired(self):
         now = int(round(time.time() * 1000))
         if (now > (self.expireTime-1000)):
             return True
         else:
             return False
 
-    def get_device_capture(deviceSerial):
+    def get_device_capture(self, deviceSerial):
         r = requests.post('https://open.ys7.com/api/lapp/device/capture', data={'accessToken':self.accessToken,'deviceSerial':self.deviceSerial,'channelNo':1})
         result = r.json()
         if (result['code']=='200'):

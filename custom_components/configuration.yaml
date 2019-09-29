@@ -1,0 +1,252 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Home
+  # Location required to calculate the time the sun rises and sets
+  latitude: 31.0456
+  longitude: 121.3997
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: 4
+  # metric for Metric, imperial for Imperial
+  unit_system: metric
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: Asia/Shanghai
+
+
+  whitelist_external_dirs:
+    - /tmp
+  customize:
+    #binary_sensor.switch_158d00010c10d7:
+    switch.plug_158d00010c10d7:
+      friendly_name: "fishbowl switch"
+      emulated_hue_name: "fishbowl switch"
+    light.gateway_light_f0b429aa2506:
+      friendly_name: "gateway light"
+      emulated_hue_name: "gateway light"
+    #switch.media_fan:
+    #  emulated_hue_name: "electric fan"
+# Show links to resources in log and frontend
+#introduction:
+
+# Enables the frontend
+frontend:
+
+# Enables configuration UI
+config:
+
+http:
+  # Uncomment this to add a password (recommended!)
+  api_password: "821122hh"
+  # Uncomment this if you are using SSL or running in Docker etc
+  #base_url: naimin.duckdns.org
+  ssl_certificate: /home/homeassistant/ssl/certificate.pem
+  ssl_key: /home/homeassistant/ssl/private-key.pem
+
+# Checks for available updates
+# Note: This component will send some information about your system to
+# the developers to assist with development of Home Assistant.
+# For more information, please see:
+# https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
+
+media_player:
+  - platform: braviatv
+    host: 192.168.2.208
+
+
+updater:
+
+# Discover some devices automatically
+discovery:
+  ignore:
+    - yeelight
+yeelight:
+  devices:
+    192.168.2.209:
+      name: "Living Room"
+# Allows you to issue voice commands from the frontend in enabled browsers
+conversation:
+
+# Enables support for tracking state changes over time.
+#history:
+camera:
+  - platform: ezviz
+    name: "ezviz"
+    id: "C92725813"
+    key: "d73dffda437643f2974edc5c70bb4915"
+    sec: "21d278a88b13642ab26d3c0cf11003d5"
+#recorder:
+#  purge_interval: 2
+#  purge_keep_days: 5
+#  db_url: postgres://127.0.0.1/homeassistant
+#  exclude:
+#    domains:
+#      - automation
+#      - weblink
+#      - updater
+#    entities:
+#      - sun.sun # Don't record sun data
+#      - sensor.last_boot # Comes from 'systemmonitor' sensor platform
+#      - sensor.date
+#  include:
+#    domains:
+#      - sensor
+#      - switch
+#      - media_player
+# View all events in a logbook
+#logbook:
+#  exclude:
+#    domains:
+#      - weblink
+#      - sun
+#    entities:
+#      - sensor.last_boot # Comes from 'systemmonitor' sensor platform
+#      - sensor.date
+#  include:
+#    domains:
+#      - sensor
+#      - switch
+#      - media_player
+
+# Track the sun
+sun:
+
+#vultr:
+#  api_key: RAZKBLQ47W7H2BQP4TDASGDYTNFQF5TLQAZQ
+sensor:
+    #  - platform: vultr
+    #name: Server {}
+    #subscription: 11702656
+    #monitored_conditions:
+    #  - pending_charges
+    #  - balance  
+  - platform: yr
+#  - platform: WeatherChina
+#    CityCode:
+#    - 101020600
+  - platform: HeWeather
+    api_key: c88c585d3546476dad27f78ad321853d
+    interval: 3600
+    isShowWeatherPic: True
+    city: shanghai
+    monitored_conditions:
+      aqi:
+        - aqi
+#      ToDay_forecast:
+#        - Weather_d
+#        - Weather_n
+#        - maxTmp
+#        - minTmp
+#      Tomorrow_forecast:
+#        - Weather_d
+#        - Weather_n
+#        - maxTmp
+#        - minTmp
+      now:
+        - Weather
+        - tmp
+#  - platform: broadlink
+#    update_interval: 60
+#    host: 192.168.2.204
+#    mac: 'B4:43:0D:AA:30:6A'
+#    monitored_conditions:
+#      - temperature
+# Text to speech
+#tts:
+#  platform: google
+
+
+notify:
+  - name: email
+    platform: smtp
+    server: smtp.163.com
+    port: 25
+    timeout: 15
+    sender: hnmstar@163.com
+    encryption: none
+    username: hnmstar@163.com
+    password: moonkin82
+    recipient: 
+      - 18616822138@wo.cn
+    sender_name: "My Home Assistant"
+
+emulated_hue:
+#  type: alexa
+  listen_port: 8300
+  off_maps_to_on_domains:
+    - script
+    - scene
+  expose_by_default: true
+  exposed_domains:
+    - light
+    - switch
+xiaomi_aqara:
+  discovery_retry: 10
+  gateways:
+    - mac: 'F0:B4:29:AA:25:06'
+      key: tui03y51wychmxpq
+      host: 192.168.2.206
+shell_command:
+  wake_nas_cmd: sudo /usr/sbin/etherwake  00:11:32:74:05:3A
+script:
+  wake_nas:
+    alias: wake up nas
+    sequence:
+      - service: shell_command.wake_nas_cmd
+switch:
+  - platform: wake_on_lan
+    mac_address: "00-11-32-74-05-3A"
+    host: 192.168.2.143
+  - platform: broadlink
+    host: 192.168.2.204
+    mac: 'B4:43:0D:AA:30:6A'
+    timeout: 15
+    switches:
+      media_fan:
+        friendly_name: "electric fan"
+        command_on: 'JgBoAAABNpoVORYSFhMVExgRFRMWExQTFhMVOxQ7FjoVOxU6FzkVOhY6FjoVFBYSFRMVFBQTFhMWERYTFjoVOhY7FToVOxY5FjoWOhUTFhIWExUTFRMWExUSFhMWOhU7FTwTOxU8FDsUAA0F'
+        command_off: 'JgBoAAABNpoVORYSFhMVExgRFRMWExQTFhMVOxQ7FjoVOxU6FzkVOhY6FjoVFBYSFRMVFBQTFhMWERYTFjoVOhY7FToVOxY5FjoWOhUTFhIWExUTFRMWExUSFhMWOhU7FTwTOxU8FDsUAA0F'
+      air_condition:
+        friendly_name: "air condition"
+        command_on: 'JgC8AXM4Dw4OKg8ODw8ODg8ODg8OEA4NDw4PDhAODg4OKw8NDw4PDg8ODw4PDg8ODykPKg8qDw4ODg8qDw8PDQ8PDQ4QDg8NDw4PDg8ODw4OEA8NDw4QDA8QDw0ODw4ODw4ODw8ODw8QDA4ODw4PDg8ODw4PDg4PDykPKg8ODg8ODxAMDw4QAAFmdTcOEA0qDw8ODw4ODw0PDhANDw8PDRAODw0QDQ8pEA8NDg8ODw4QDQ8ODg4PKw8pDyoQDBAPDSoPDhANDhANDg8ODw8ODg8ODw4ODw4OEA0PDhApDw4ODxAODSoPKhANEA0PDg8NEA0QKQ8qDykPDg8ODw4PDg4ODxANDw4ODw4PKg8pDw4PDhANDw4PKRANDywODRAODw8ODg4ODw4PDg8ODw4PDg8PDg4ODg8ODw8ODg8QDSoQKA8ODw4PDw4OEA0PDhANDw8ODg4ODyoPKg8ODw4ODhEMDw8ODg8ODw4ODxAODQ4PEA0QDg0PDw4ODw4PKQ8OECkQDg8ODwwPDhApDw8PDg4ODg8ODhANDw4PDg8PDg4PDg4PDg4PDg8QEQsQKg4qDg8PKQ8qDioPKw4OEAANBQAAAAAAAAAAAAAAAA=='
+        command_off: 'JgDAAXQ4Dw4OKg8PDg4PDg8ODw4PDg8NDw4PDg8PDg4PKRANDw4QDg8NDw4PDg8ODioRKA8qEA4PDBApDw4PDg4PDg8ODw4PDg4QDQ8ODw4PDg4ODw8ODg8QDg4ODw4ODw4PDg4PDw4PDQ8ODw8ODg8ODg8PDg8OECgPKg4PEA0PDRANDw8OAAFnczkPDRApDw4PDw0PDhANDw4ODw4PDw8NEA0PDg4qDw4PDg8OEA4ODw0PDg4PKg8qDisODhANDyoPDg8ODw4ODg8ODw4PDg8ODg8QDg0PEA0ODw4ODw4QDQ8ODioRKA8PDg4QDQ4QDg8OKQ8qDyoODw4PDg4PDg8PDw4NDg8QDQ4PKw4qDg8PDQ8QDQ8OKw0PDioPDg8PDg8ODg8ODw4PDhANDw4PDg4ODw4PDw4ODw4PDw4PDikQKg8ODg4ODw4OEA4ODw4ODw4PDg8ODykQKRANDw4PDw0PDg4PDg8ODw4PDw4ODw4PDw4NDxANDg8ODw8OKw8NDywNDg8ODw8ODw0qDw8ODhAODg4QDRANEA0ODw4ODw4PDg8ODw4QDQ8NDw8ODhApDw4OKg8rDisNKg8ODwAFugkADQUAAAAAdDgPDg=='
+      night_light:
+        friendly_name: "night light"
+        command_on: 'JgDUAS0NLg0PKS4NLQ0tDi0ODykQKBEoECgPAAEHLg4rDxAoLA8sDS4NLQ4QKBEnESgPKQ8AAQwtDS0ODyosDi4NLA4tDhAoECkQKA8qDwABBi4MLQ4PKS0OLQ4sDi0ODykPKg8pDykPAAELLg0tDRAqLA0uDS4OLA0PKRApECgPKhAAAQUuDS0NDykuDi4MLQ4sDg8qDikRKQ4pDwABCy4OLA8OKS0NLw0sDi4MDyoPKg4qECcRAAEGLA4tDRAoLg0uDSwOLQ8PKA8pDykQKQ8AARktDS8MDyotDS0PKw4tDg8qDisOKg4qEAABBiwNLQ4PKS0NLg0uDC4NDykRKA8pDykPAAEZLg0tDw4pLgwtDi4NLA4PKg4pESgPKQ8AAQYtDi0OECgtDiwOLQ4uDQ4pECoOKRApDwABGSwOLQ4OKi4OLA4sDS0ODyoPKBApDykQAAEFLg4tDg4pLgwuDS0PLA0QKBAqDikQKQ4AARktDi0NECkuDC4NLQ4sDw8oDykQKRAqDQABBywPLA4QKC4NLA4tDi0NDykQKg8pDikRAAEXLQ8sDQ8qLRAqDi0OLQ4PKQ4qDyoOKw4AAQYtDS0OECgtDi4MLQ4tDhAnECoOKQ8qDwANBS4NLQ4='
+        command_off: 'JgAEAS4NLQ0QKS4NLQ4tDQ8pDykQKREoDisPAAEFLQ8tDg0qLQ8rDi0ODykPKRApDykPKQ8AAQ0sDywPDSouDC0PLA0QKg8pDyoOKQ8pEAABBi4MLwwPKiwOLQ0tDw4qECgPKQ8pECkPAAELLQ4tDg8qLQ0uDC0ODyoOKg8pDyoQKQ8AAQUtDywNECktDS4NLQ8OKRAqDikPKQ8qDwABDCwPLA0PKS4NLg0tDQ8qDykQKBApECgPAAEHLQ0uDRApLQ4sDS4NDykPKg8pECoPKA8AARosDywNDyosDywOLQ0QKQ8pDyoOKREpDgABBywPLA4PKiwNLQ4tDw4pDykQKQ8pDykQAA0FAAAAAA=='
+# Example configuration.yaml entry
+alexa:
+  intents:
+    WhereAreWeIntent:
+      speech:
+        type: plaintext
+        text: >
+          {%- if is_state('device_tracker.paulus', 'home') and
+                 is_state('device_tracker.anne_therese', 'home') -%}
+            You are both home, you silly
+          {%- else -%}
+            Anne Therese is at {{ states("device_tracker.anne_therese") }}
+            and Paulus is at {{ states("device_tracker.paulus") }}
+          {% endif %}
+
+    LocateIntent:
+      action:
+        service: notify.notify
+        data_template:
+          message: The location of {{ User }} has been queried via Alexa.
+      speech:
+        type: plaintext
+        text: >
+          {%- for state in states.device_tracker -%}
+            {%- if state.name.lower() == User.lower() -%}
+              {{ state.name }} is at {{ state.state }}
+            {%- elif loop.last -%}
+              I am sorry, I do not know where {{ User }} is.
+            {%- endif -%}
+          {%- else -%}
+            Sorry, I don't have any trackers registered.
+          {%- endfor -%}
+      card:
+        type: simple
+        title: Sample title
+        content: Some more content
+group: !include groups.yaml
+automation: !include automations.yaml
